@@ -11,7 +11,19 @@
 #include "aes.h"
 
 void cipher(aes_state * state) {
-    return;
+    addRoundKey(state->buffer);
+
+    int i;
+    for (i = 0; i < NUM_ROUNDS; i++) {
+        subBytes(state->buffer);
+        shiftRows(state->buffer);
+        mixColumns(state->buffer);
+        addRoundKey(state->buffer);
+    }
+
+    subBytes(state->buffer);
+    shiftRows(state->buffer);
+    addRoundKey(state->buffer);
 }
 
 void subBytes(uint32_t * buffer) {
