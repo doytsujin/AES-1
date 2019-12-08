@@ -10,6 +10,8 @@
 #include <stdint.h>
 #include "aes.h"
 
+#define IND(row, column) ((column * BLOCK_SIZE) + row)
+
 static const uint32_t subBytesSBox[16*16] = {
     0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c,
     0x7c, 0x82, 0xfd, 0xc7, 0x83, 0xd1, 0xef, 0xa3, 0x0c, 0x81, 0x32, 0xc8, 0x78, 0x3e, 0xf8, 0xa1,
@@ -54,7 +56,18 @@ void subBytes(uint32_t * buffer) {
 }
 
 void shiftRows(uint32_t * buffer) {
-    return;
+    uint8_t * byte_buffer = (uint8_t *)buffer;
+    uint8_t temp_bytes[BLOCK_SIZE];
+
+    int row, column;
+    for (row = 1; row < 4; row++) {
+        for (column = 0; column < BLOCK_SIZE; column++){
+            temp_bytes[(column + (BLOCK_SIZE - row)) % BLOCK_SIZE] = byte_buffer[IND(row, column)];
+        }
+        for (column = 0; column < BLOCK_SIZE; column++) {
+            byte_buffer[IND(row, column)] = temp_bytes[column];
+        }
+    }
 }
 
 void mixColumns(uint32_t * buffer) {
