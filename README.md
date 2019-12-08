@@ -6,12 +6,12 @@ This code implements AES from the [FIPS standard](https://csrc.nist.gov/csrc/med
 
 ## Build
 ```bash
-gcc -o aes *.c *.h
+gcc -ansi *.c *.h -o test_aes.out
 ```
 
 ### Run
 ```bash
-./aes
+./test_aes.out
 ```
 
 ### License
