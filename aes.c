@@ -11,7 +11,7 @@
 #include "aes.h"
 
 #define IND(row, column) ((column * BLOCK_SIZE) + row)
-#define MODULUS 0x11
+#define MODULUS 0x011b
 
 static const uint8_t subBytesSBox[16*16] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
@@ -53,15 +53,14 @@ uint8_t mult(uint8_t n, uint8_t m) {
     uint16_t res = 0;
     for(; m > 0; m >>= 1) {
         if (m & 0x1) {
-            res |= mul;
+            res ^= mul;
         }
         mul <<= 1;
     }
 
-
-    uint16_t shifted_modulus = MODULUS << 11;
+    uint16_t shifted_modulus = MODULUS << 7;
     uint16_t test_bit = 0x8000;
-    while (res > MODULUS) {
+    while (res >= 0x0100) {
         if (test_bit & res) {
             res ^= shifted_modulus;
         }
@@ -97,12 +96,18 @@ void shiftRows(uint32_t * buffer) {
 
 void mixColumns(uint32_t * buffer) {
     uint8_t * byte_buffer = (uint8_t *)buffer;
+    uint8_t temp_bytes[4];
+
     int column;
     for (column = 0; column < BLOCK_SIZE; column++) {
-        byte_buffer[4 * column] = mult(0x02, byte_buffer[4 * column]) ^  mult(0x03, byte_buffer[(4 * column) + 1]) ^ byte_buffer[(4 * column) + 2] ^ byte_buffer[(4 * column) + 3];
-        byte_buffer[(4 * column) + 1] = byte_buffer[4 * column] ^ mult(0x02, byte_buffer[(4 * column) + 1]) ^ mult(0x03, byte_buffer[(4 * column) + 2]) ^ byte_buffer[(4 * column) + 3];
-        byte_buffer[(4 * column) + 2] = byte_buffer[4 * column] ^ byte_buffer[(4 * column) + 1] ^ mult(0x02, byte_buffer[(4 * column) + 2]) ^ mult(0x03, byte_buffer[(4 * column) + 3]);
-        byte_buffer[(4 * column) + 3] = mult(0x03, byte_buffer[4 * column]) ^ byte_buffer[(4 * column) + 1] ^ byte_buffer[(4 * column) + 2] ^ mult(0x02, byte_buffer[(4 * column) + 3]);
+        temp_bytes[0] = mult(0x02, byte_buffer[4 * column]) ^  mult(0x03, byte_buffer[(4 * column) + 1]) ^ byte_buffer[(4 * column) + 2] ^ byte_buffer[(4 * column) + 3];
+        temp_bytes[1] = byte_buffer[4 * column] ^ mult(0x02, byte_buffer[(4 * column) + 1]) ^ mult(0x03, byte_buffer[(4 * column) + 2]) ^ byte_buffer[(4 * column) + 3];
+        temp_bytes[2] = byte_buffer[4 * column] ^ byte_buffer[(4 * column) + 1] ^ mult(0x02, byte_buffer[(4 * column) + 2]) ^ mult(0x03, byte_buffer[(4 * column) + 3]);
+        temp_bytes[3] = mult(0x03, byte_buffer[4 * column]) ^ byte_buffer[(4 * column) + 1] ^ byte_buffer[(4 * column) + 2] ^ mult(0x02, byte_buffer[(4 * column) + 3]);
+        byte_buffer[4 * column] = temp_bytes[0];
+        byte_buffer[4 * column + 1] = temp_bytes[1];
+        byte_buffer[4 * column + 2] = temp_bytes[2];
+        byte_buffer[4 * column + 3] = temp_bytes[3];
     }
 }
 

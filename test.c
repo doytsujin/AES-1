@@ -20,6 +20,16 @@ int assert_arrays_equal(const uint32_t * array1, const uint32_t * array2, int le
     return 1;
 }
 
+int test_mult() {
+    uint8_t a = 0x57;
+    uint8_t b = 0x83;
+
+    uint8_t c = 0xf1;
+    uint8_t d = 0x03;
+
+    return (mult(a, b) == 0xc1) && (mult(c, d) == 0x08);
+}
+
 int test_sub_bytes() {
     uint32_t before[BLOCK_SIZE] = {
         0xbee33d19, 0x2be2f4a0, 0x2a8dc69a, 0x0848f8e9
@@ -42,16 +52,28 @@ int test_shift_rows() {
     return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
-int test_mult() {
-    uint8_t a = 0x68;
-    uint8_t b = 1;
-
-    return mult(a, b) == 0x0e;
+int test_mix_columns() {
+    uint32_t before[BLOCK_SIZE] = {
+        0x305dbfd4, 0xae52b4e0, 0xf11141b8, 0xe598271e
+    };
+    const static uint32_t after[BLOCK_SIZE] = {
+        0xe5816604, 0x9a19cbe0, 0x7ad3f848, 0x4c260628
+    };
+    mixColumns(before);
+    return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
 int main() {
     int num_failed = 0;
     int num_succeeded = 0;
+
+    if (test_mult()) {
+        num_succeeded++;
+        printf("test_mult(): SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("test_mult(): FAILED!\n");
+    }
 
     if (test_sub_bytes()) {
         num_succeeded++;
@@ -69,12 +91,12 @@ int main() {
         printf("test_shift_rows(): FAILED!");
     }
 
-    if (test_mult()) {
+    if (test_mix_columns()) {
         num_succeeded++;
-        printf("test_mult(): SUCCEEDED!\n");
+        printf("test_mix_columns(): SUCCEEDED!\n");
     } else {
         num_failed++;
-        printf("test_mult(): FAILED!\n");
+        printf("test_mix_columns(): FAILED!\n");
     }
 
     printf("\n%d tests failed\n", num_failed);
