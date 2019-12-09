@@ -37,6 +37,8 @@ void cipher(aes_state * state);
 
 /* Should be private, but public for testing */
 uint8_t mult(uint8_t n, uint8_t m);
+uint32_t subWord(uint32_t w);
+uint32_t rotWord(uint32_t w);
 void subBytes(uint32_t * buffer);
 void shiftRows(uint32_t * buffer);
 void mixColumns(uint32_t * buffer);

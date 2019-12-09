@@ -32,6 +32,18 @@ int test_mult() {
     return (mult(a, b) == 0xc1) && (mult(c, d) == 0x08);
 }
 
+int test_sub_word() {
+    uint32_t a = 0xbee33d19;
+
+    return (subWord(a) == 0xae1127d4) && (a == 0xbee33d19);
+}
+
+int test_rot_word() {
+    uint32_t a = 0x09cf4f3c;
+
+    return (rotWord(a) == 0xcf4f3c09) && (a == 0x09cf4f3c);
+}
+
 int test_sub_bytes() {
     uint32_t before[BLOCK_SIZE] = {
         0xbee33d19, 0x2be2f4a0, 0x2a8dc69a, 0x0848f8e9
@@ -71,6 +83,24 @@ int main() {
 
     printf("test_mult(): ");
     if (test_mult()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_sub_word(): ");
+    if (test_sub_word()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_rot_word(): ");
+    if (test_rot_word()) {
         num_succeeded++;
         printf("SUCCEEDED!\n");
     } else {

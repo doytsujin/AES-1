@@ -73,6 +73,28 @@ uint8_t mult(uint8_t n, uint8_t m) {
     return (uint8_t)res;
 }
 
+uint32_t subWord(uint32_t w) {
+    uint8_t * byte_buffer = (uint8_t *)&w;
+    int i;
+    for (i = 0; i < 4; i++){
+        byte_buffer[i] = subBytesSBox[byte_buffer[i]];
+    }
+
+    return w;
+}
+
+uint32_t rotWord(uint32_t w) {
+    uint8_t * byte_buffer = (uint8_t *)&w;
+
+    uint8_t last_byte = byte_buffer[3];
+    byte_buffer[3] = byte_buffer[2];
+    byte_buffer[2] = byte_buffer[1];
+    byte_buffer[1] = byte_buffer[0];
+    byte_buffer[0] = last_byte;
+
+    return w;
+}
+
 void subBytes(uint32_t * buffer) {
     uint8_t * byte_buffer = (uint8_t *)buffer;
     int i;
