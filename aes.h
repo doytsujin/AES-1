@@ -34,6 +34,7 @@ typedef struct {
 } aes_state;
 
 void cipher(aes_state * state);
+void keyExpansion(aes_state * state, const uint32_t * cipher_key);
 
 /* Should be private, but public for testing */
 uint8_t mult(uint8_t n, uint8_t m);

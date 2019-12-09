@@ -13,6 +13,12 @@
 #define IND(row, column) ((column * BLOCK_SIZE) + row)
 #define MODULUS 0x011b
 
+static const uint32_t rcon[10] = {
+    0x01000000, 0x02000000, 0x04000000, 0x08000000,
+    0x10000000, 0x20000000, 0x40000000, 0x80000000,
+    0x1b000000, 0x36000000
+};
+
 static const uint8_t subBytesSBox[16*16] = {
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
     0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -46,6 +52,26 @@ void cipher(aes_state * state) {
     subBytes(state->buffer);
     shiftRows(state->buffer);
     addRoundKey(state, NUM_ROUNDS);
+}
+
+void keyExpansion(aes_state * state, const uint32_t * cipher_key) {
+    int i;
+    for (i = 0; i < KEY_LENGTH; i++) {
+        state->key_schedule[i] = cipher_key[i];
+    }
+
+    for (; i < BLOCK_SIZE * (NUM_ROUNDS + 1); i++) {
+        uint32_t temp = state->key_schedule[i - 1];
+        if (i % KEY_LENGTH == 0) {
+            temp = subWord(rotWord(temp)) ^ rcon[(i - KEY_LENGTH) / KEY_LENGTH];
+        }
+#if KEY_LENGTH==8
+        else if (i % KEY_LENGTH == 4) {
+            temp = subWord(temp);
+        }
+#endif
+        state->key_schedule[i] = state->key_schedule[i - KEY_LENGTH] ^ temp;
+    }
 }
 
 uint8_t mult(uint8_t n, uint8_t m) {
