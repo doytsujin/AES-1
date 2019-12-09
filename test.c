@@ -100,6 +100,27 @@ int test_key_expansion() {
     return assert_arrays_equal(state.key_schedule, key_schedule, 44);
 }
 
+int test_cipher() {
+    aes_state state;
+    const static uint32_t buffer[4] = {
+        0xa8f64332, 0x8d305a88, 0xa2983131, 0x340737e0
+    };
+    int i;
+    for (i = 0; i < 4; i++)
+        state.buffer[i] = buffer[i];
+    const static uint32_t cipher_key[4] = {
+        0x16157e2b, 0xa6d2ae28, 0x8815f7ab, 0x3c4fcf09
+    };
+    const static uint32_t after[4] = {
+        0x1d842539, 0xfb09dc02, 0x978511dc, 0x320b6a19
+    };
+
+    keyExpansion(&state, cipher_key);
+    cipher(&state);
+
+    return assert_arrays_equal(state.buffer, after, BLOCK_SIZE);
+}
+
 int main() {
     int num_failed = 0;
     int num_succeeded = 0;
@@ -160,6 +181,15 @@ int main() {
 
     printf("test_key_expansion(): ");
     if (test_key_expansion()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_cipher(): ");
+    if (test_cipher()) {
         num_succeeded++;
         printf("SUCCEEDED!\n");
     } else {
