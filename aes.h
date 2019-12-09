@@ -36,6 +36,7 @@ typedef struct {
 void cipher(aes_state * state);
 
 /* Should be private, but public for testing */
+uint8_t mult(uint8_t n, uint8_t m);
 void subBytes(uint32_t * buffer);
 void shiftRows(uint32_t * buffer);
 void mixColumns(uint32_t * buffer);

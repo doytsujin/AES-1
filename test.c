@@ -31,6 +31,13 @@ int test_shift_rows() {
     return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
+int test_mult() {
+    uint8_t a = 0x68;
+    uint8_t b = 1;
+
+    return mult(a, b) == 0x0e;
+}
+
 int main() {
     int num_failed = 0;
     int num_succeeded = 0;
@@ -41,6 +48,14 @@ int main() {
     } else {
         num_failed++;
         printf("test_shift_rows(): FAILED!");
+    }
+
+    if (test_mult()) {
+        num_succeeded++;
+        printf("test_mult(): SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("test_mult(): FAILED!\n");
     }
 
     printf("\n%d tests failed\n", num_failed);

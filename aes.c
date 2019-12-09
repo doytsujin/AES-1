@@ -11,6 +11,7 @@
 #include "aes.h"
 
 #define IND(row, column) ((column * BLOCK_SIZE) + row)
+#define MODULUS 0x11
 
 static const uint8_t subBytesSBox[16*16] = {
     0x63, 0xca, 0xb7, 0x04, 0x09, 0x53, 0xd0, 0x51, 0xcd, 0x60, 0xe0, 0xe7, 0xba, 0x70, 0xe1, 0x8c,
@@ -47,6 +48,30 @@ void cipher(aes_state * state) {
     addRoundKey(state->buffer);
 }
 
+uint8_t mult(uint8_t n, uint8_t m) {
+    uint16_t mul = (uint16_t)n;
+    uint16_t res = 0;
+    for(; m > 0; m >>= 1) {
+        if (m & 0x1) {
+            res |= mul;
+        }
+        mul <<= 1;
+    }
+
+
+    uint16_t shifted_modulus = MODULUS << 11;
+    uint16_t test_bit = 0x8000;
+    while (res > MODULUS) {
+        if (test_bit & res) {
+            res ^= shifted_modulus;
+        }
+        test_bit >>= 1;
+        shifted_modulus >>= 1;
+    }
+
+    return (uint8_t)res;
+}
+
 void subBytes(uint32_t * buffer) {
     uint8_t * byte_buffer = (uint8_t *)buffer;
     int i;
@@ -71,7 +96,14 @@ void shiftRows(uint32_t * buffer) {
 }
 
 void mixColumns(uint32_t * buffer) {
-    return;
+    uint8_t * byte_buffer = (uint8_t *)buffer;
+    int column;
+    for (column = 0; column < BLOCK_SIZE; column++) {
+        byte_buffer[4 * column] = mult(0x02, byte_buffer[4 * column]) ^  mult(0x03, byte_buffer[(4 * column) + 1]) ^ byte_buffer[(4 * column) + 2] ^ byte_buffer[(4 * column) + 3];
+        byte_buffer[(4 * column) + 1] = byte_buffer[4 * column] ^ mult(0x02, byte_buffer[(4 * column) + 1]) ^ mult(0x03, byte_buffer[(4 * column) + 2]) ^ byte_buffer[(4 * column) + 3];
+        byte_buffer[(4 * column) + 2] = byte_buffer[4 * column] ^ byte_buffer[(4 * column) + 1] ^ mult(0x02, byte_buffer[(4 * column) + 2]) ^ mult(0x03, byte_buffer[(4 * column) + 3]);
+        byte_buffer[(4 * column) + 3] = mult(0x03, byte_buffer[4 * column]) ^ byte_buffer[(4 * column) + 1] ^ byte_buffer[(4 * column) + 2] ^ mult(0x02, byte_buffer[(4 * column) + 3]);
+    }
 }
 
 void addRoundKey(uint32_t * buffer) {
