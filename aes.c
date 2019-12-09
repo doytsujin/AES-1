@@ -14,9 +14,9 @@
 #define MODULUS 0x011b
 
 static const uint32_t rcon[10] = {
-    0x01000000, 0x02000000, 0x04000000, 0x08000000,
-    0x10000000, 0x20000000, 0x40000000, 0x80000000,
-    0x1b000000, 0x36000000
+    0x00000001, 0x00000002, 0x00000004, 0x00000008,
+    0x00000010, 0x00000020, 0x00000040, 0x00000080,
+    0x0000001b, 0x00000036
 };
 
 static const uint8_t subBytesSBox[16*16] = {
@@ -112,11 +112,11 @@ uint32_t subWord(uint32_t w) {
 uint32_t rotWord(uint32_t w) {
     uint8_t * byte_buffer = (uint8_t *)&w;
 
-    uint8_t last_byte = byte_buffer[3];
-    byte_buffer[3] = byte_buffer[2];
-    byte_buffer[2] = byte_buffer[1];
-    byte_buffer[1] = byte_buffer[0];
-    byte_buffer[0] = last_byte;
+    uint8_t first_byte = byte_buffer[0];
+    byte_buffer[0] = byte_buffer[1];
+    byte_buffer[1] = byte_buffer[2];
+    byte_buffer[2] = byte_buffer[3];
+    byte_buffer[3] = first_byte;
 
     return w;
 }
