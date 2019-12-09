@@ -3,7 +3,9 @@
  * Copyright: 2019
  * License: MPL 2.0
  *
- * Runs tests for the aes library.
+ * Runs tests for the aes library. The success or failure of each function will
+ * be printed to the screen. The program returns 0 if there were no failures,
+ * and 1 if any test cases failed.
  */
 
 #include <stdint.h>
@@ -67,38 +69,44 @@ int main() {
     int num_failed = 0;
     int num_succeeded = 0;
 
+    printf("test_mult(): ");
     if (test_mult()) {
         num_succeeded++;
-        printf("test_mult(): SUCCEEDED!\n");
+        printf("SUCCEEDED!\n");
     } else {
         num_failed++;
-        printf("test_mult(): FAILED!\n");
+        printf("FAILED!\n");
     }
 
+    printf("test_sub_bytes(): ");
     if (test_sub_bytes()) {
         num_succeeded++;
-        printf("test_sub_bytes(): SUCCEEDED!\n");
+        printf("SUCCEEDED!\n");
     } else {
         num_failed++;
-        printf("test_sub_bytes(): FAILED!\n");
+        printf("FAILED!\n");
     }
 
+    printf("test_shift_rows(): ");
     if (test_shift_rows()) {
         num_succeeded++;
-        printf("test_shift_rows(): SUCCEEDED!\n");
+        printf("SUCCEEDED!\n");
     } else {
         num_failed++;
-        printf("test_shift_rows(): FAILED!");
+        printf("FAILED!\n");
     }
 
+    printf("test_mix_columns(): ");
     if (test_mix_columns()) {
         num_succeeded++;
-        printf("test_mix_columns(): SUCCEEDED!\n");
+        printf("SUCCEEDED!\n");
     } else {
         num_failed++;
-        printf("test_mix_columns(): FAILED!\n");
+        printf("FAILED!\n");
     }
 
     printf("\n%d tests failed\n", num_failed);
     printf("%d tests succeeded\n", num_succeeded);
+
+    return !num_failed;
 }

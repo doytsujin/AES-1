@@ -49,6 +49,7 @@ void cipher(aes_state * state) {
 }
 
 uint8_t mult(uint8_t n, uint8_t m) {
+    /* polynomial multiplication */
     uint16_t mul = (uint16_t)n;
     uint16_t res = 0;
     for(; m > 0; m >>= 1) {
@@ -58,6 +59,7 @@ uint8_t mult(uint8_t n, uint8_t m) {
         mul <<= 1;
     }
 
+    /* polynomial division, returning the remainder */
     uint16_t shifted_modulus = MODULUS << 7;
     uint16_t test_bit = 0x8000;
     while (res >= 0x0100) {
@@ -104,6 +106,7 @@ void mixColumns(uint32_t * buffer) {
         temp_bytes[1] = byte_buffer[4 * column] ^ mult(0x02, byte_buffer[(4 * column) + 1]) ^ mult(0x03, byte_buffer[(4 * column) + 2]) ^ byte_buffer[(4 * column) + 3];
         temp_bytes[2] = byte_buffer[4 * column] ^ byte_buffer[(4 * column) + 1] ^ mult(0x02, byte_buffer[(4 * column) + 2]) ^ mult(0x03, byte_buffer[(4 * column) + 3]);
         temp_bytes[3] = mult(0x03, byte_buffer[4 * column]) ^ byte_buffer[(4 * column) + 1] ^ byte_buffer[(4 * column) + 2] ^ mult(0x02, byte_buffer[(4 * column) + 3]);
+
         byte_buffer[4 * column] = temp_bytes[0];
         byte_buffer[4 * column + 1] = temp_bytes[1];
         byte_buffer[4 * column + 2] = temp_bytes[2];

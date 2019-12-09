@@ -6,7 +6,7 @@ This code implements AES from the [FIPS standard](https://csrc.nist.gov/csrc/med
 
 ## Build
 ```bash
-gcc -ansi *.c *.h -o test_aes.out
+gcc -ansi -Wall *.c *.h -o test_aes.out
 ```
 
 ### Run
