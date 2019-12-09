@@ -20,6 +20,17 @@ int assert_arrays_equal(const uint32_t * array1, const uint32_t * array2, int le
     return 1;
 }
 
+int test_sub_bytes() {
+    uint32_t before[BLOCK_SIZE] = {
+        0xbee33d19, 0x2be2f4a0, 0x2a8dc69a, 0x0848f8e9
+    };
+    const static uint32_t after[BLOCK_SIZE] = {
+        0xae1127d4, 0xf198bfe0, 0xe55db4b8, 0x3052411e
+    };
+    subBytes(before);
+    return assert_arrays_equal(before, after, BLOCK_SIZE);
+}
+
 int test_shift_rows() {
     uint32_t before[BLOCK_SIZE] = {
         0x0c080400, 0x0d090501, 0x0e0a0602, 0x0f0b0703
@@ -41,6 +52,14 @@ int test_mult() {
 int main() {
     int num_failed = 0;
     int num_succeeded = 0;
+
+    if (test_sub_bytes()) {
+        num_succeeded++;
+        printf("test_sub_bytes(): SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("test_sub_bytes(): FAILED!\n");
+    }
 
     if (test_shift_rows()) {
         num_succeeded++;
