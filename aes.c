@@ -33,19 +33,19 @@ static const uint8_t subBytesSBox[16*16] = {
 };
 
 void cipher(aes_state * state) {
-    addRoundKey(state->buffer);
+    addRoundKey(state, 0);
 
     int i;
-    for (i = 0; i < NUM_ROUNDS; i++) {
+    for (i = 1; i < NUM_ROUNDS; i++) {
         subBytes(state->buffer);
         shiftRows(state->buffer);
         mixColumns(state->buffer);
-        addRoundKey(state->buffer);
+        addRoundKey(state, i);
     }
 
     subBytes(state->buffer);
     shiftRows(state->buffer);
-    addRoundKey(state->buffer);
+    addRoundKey(state, NUM_ROUNDS);
 }
 
 uint8_t mult(uint8_t n, uint8_t m) {
@@ -106,6 +106,9 @@ void mixColumns(uint32_t * buffer) {
     }
 }
 
-void addRoundKey(uint32_t * buffer) {
-    return;
+void addRoundKey(aes_state * state, int round) {
+    int i;
+    for (i = 0; i < BLOCK_SIZE; i++) {
+        state->buffer[i] ^= state->key_schedule[(round * BLOCK_SIZE) + i];
+    }
 }

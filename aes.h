@@ -40,6 +40,6 @@ uint8_t mult(uint8_t n, uint8_t m);
 void subBytes(uint32_t * buffer);
 void shiftRows(uint32_t * buffer);
 void mixColumns(uint32_t * buffer);
-void addRoundKey(uint32_t * buffer);
+void addRoundKey(aes_state * state, int round);
 
 #endif /* AES_H */
