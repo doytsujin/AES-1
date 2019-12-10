@@ -55,6 +55,17 @@ int test_sub_bytes() {
     return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
+int test_inv_sub_bytes() {
+    uint32_t before[BLOCK_SIZE] = {
+        0xae1127d4, 0xf198bfe0, 0xe55db4b8, 0x3052411e
+    };
+    const static uint32_t after[BLOCK_SIZE] = {
+        0xbee33d19, 0x2be2f4a0, 0x2a8dc69a, 0x0848f8e9
+    };
+    invSubBytes(before);
+    return assert_arrays_equal(before, after, BLOCK_SIZE);
+}
+
 int test_shift_rows() {
     uint32_t before[BLOCK_SIZE] = {
         0x0c080400, 0x0d090501, 0x0e0a0602, 0x0f0b0703
@@ -66,6 +77,17 @@ int test_shift_rows() {
     return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
+int test_inv_shift_rows() {
+    uint32_t before[BLOCK_SIZE] = {
+        0x0f0a0500, 0x0c0b0601, 0x0d080702, 0x0e090403
+    };
+    const static uint32_t after[BLOCK_SIZE] = {
+        0x0c080400, 0x0d090501, 0x0e0a0602, 0x0f0b0703
+    };
+    invShiftRows(before);
+    return assert_arrays_equal(before, after, BLOCK_SIZE);
+}
+
 int test_mix_columns() {
     uint32_t before[BLOCK_SIZE] = {
         0x305dbfd4, 0xae52b4e0, 0xf11141b8, 0xe598271e
@@ -74,6 +96,17 @@ int test_mix_columns() {
         0xe5816604, 0x9a19cbe0, 0x7ad3f848, 0x4c260628
     };
     mixColumns(before);
+    return assert_arrays_equal(before, after, BLOCK_SIZE);
+}
+
+int test_inv_mix_columns() {
+    uint32_t before[BLOCK_SIZE] = {
+        0xe5816604, 0x9a19cbe0, 0x7ad3f848, 0x4c260628
+    };
+    const static uint32_t after[BLOCK_SIZE] = {
+        0x305dbfd4, 0xae52b4e0, 0xf11141b8, 0xe598271e
+    };
+    invMixColumns(before);
     return assert_arrays_equal(before, after, BLOCK_SIZE);
 }
 
@@ -121,6 +154,46 @@ int test_cipher() {
     return assert_arrays_equal(state.buffer, after, BLOCK_SIZE);
 }
 
+int test_inv_cipher() {
+    aes_state state;
+    const static uint32_t buffer[4] = {
+        0x1d842539, 0xfb09dc02, 0x978511dc, 0x320b6a19
+    };
+    int i;
+    for (i = 0; i < 4; i++)
+        state.buffer[i] = buffer[i];
+    const static uint32_t cipher_key[4] = {
+        0x16157e2b, 0xa6d2ae28, 0x8815f7ab, 0x3c4fcf09
+    };
+    const static uint32_t after[4] = {
+        0xa8f64332, 0x8d305a88, 0xa2983131, 0x340737e0
+    };
+
+    keyExpansion(&state, cipher_key);
+    invCipher(&state);
+
+    return assert_arrays_equal(state.buffer, after, BLOCK_SIZE);
+}
+
+int test_encrypts_and_decrypts() {
+    aes_state state;
+    const static uint32_t buffer[4] = {
+        0x87d6fe20, 0x98283efa, 0xaeb234b3, 0x7c73eba2
+    };
+    int i;
+    for (i = 0; i < 4; i++)
+        state.buffer[i] = buffer[i];
+    const static uint32_t cipher_key[4] = {
+        0x16157e2b, 0xa6d2ae28, 0x8815f7ab, 0x3c4fcf09
+    };
+
+    keyExpansion(&state, cipher_key);
+    cipher(&state);
+    invCipher(&state);
+
+    return assert_arrays_equal(state.buffer, buffer, BLOCK_SIZE);
+}
+
 int main() {
     int num_failed = 0;
     int num_succeeded = 0;
@@ -161,6 +234,15 @@ int main() {
         printf("FAILED!\n");
     }
 
+    printf("test_inv_sub_bytes(): ");
+    if (test_inv_sub_bytes()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
     printf("test_shift_rows(): ");
     if (test_shift_rows()) {
         num_succeeded++;
@@ -170,8 +252,26 @@ int main() {
         printf("FAILED!\n");
     }
 
+    printf("test_inv_shift_rows(): ");
+    if (test_inv_shift_rows()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
     printf("test_mix_columns(): ");
     if (test_mix_columns()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_inv_mix_columns(): ");
+    if (test_inv_mix_columns()) {
         num_succeeded++;
         printf("SUCCEEDED!\n");
     } else {
@@ -190,6 +290,24 @@ int main() {
 
     printf("test_cipher(): ");
     if (test_cipher()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_inv_cipher(): ");
+    if (test_inv_cipher()) {
+        num_succeeded++;
+        printf("SUCCEEDED!\n");
+    } else {
+        num_failed++;
+        printf("FAILED!\n");
+    }
+
+    printf("test_encrypts_and_decrypts(): ");
+    if (test_encrypts_and_decrypts()) {
         num_succeeded++;
         printf("SUCCEEDED!\n");
     } else {
